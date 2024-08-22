@@ -1,0 +1,37 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dplyr)
+library(stringr)
+library(ggplot2)
+```
+
+```{r}
+df <- read.csv("Output20240820.csv")
+
+df.clean <- df %>% 
+    mutate(Year = as.integer(str_extract(Full_ID, "(?<=ano ).*?(?=\\\\)")))
+
+
+df.group <- df.clean %>% group_by(Newspaper, Word, Year) %>% summarise(Count = n()) 
+
+write.csv(df.group, "Count_TermsByYear.csv")
+```
+
+```{r}
+p <- ggplot(df.group, aes(x = Year, y = Count, color = Newspaper)) +
+  geom_point(size=1) +
+  # geom_line() +
+  facet_wrap(~ Word, scales = "free_y") +
+  labs(title = "Number of Article Matches over time by Word and Newspaper",
+       x = "Year",
+       y = "Count") +
+  theme_minimal() +
+  theme(legend.position = "top")
+
+p
+```
+
